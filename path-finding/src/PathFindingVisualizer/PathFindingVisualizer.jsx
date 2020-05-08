@@ -4,10 +4,12 @@ import { dijkstra, getNodesInShortestPathOrder } from "../algorithms/dijkstra";
 import "./PathFindingVisualizer.css";
 import { Button } from "../components/Button.jsx";
 
-const START_NODE_ROW = 10;
-const START_NODE_COL = 15;
-const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 35;
+let START_NODE_ROW = 10;
+let START_NODE_COL = 15;
+let FINISH_NODE_ROW = 10;
+let FINISH_NODE_COL = 35;
+let moveStart = false;
+let moveFinish = false;
 
 export default class PathFindingVisualizer extends Component {
   constructor() {
@@ -23,9 +25,40 @@ export default class PathFindingVisualizer extends Component {
     this.setState({ grid: newGrid, mouseIsPressed: false });
   }
 
+  isStartFinish(row, col) {
+    return (
+      (row === START_NODE_ROW && col === START_NODE_COL) ||
+      (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
+    );
+  }
+
   handleMouseDown(row, col) {
     this.clearGrid();
-    const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+    if (!moveStart && !moveFinish) {
+      moveStart = row === START_NODE_ROW && col === START_NODE_COL;
+      moveFinish = row === FINISH_NODE_ROW && col === FINISH_NODE_COL;
+    } else {
+      if (moveStart) {
+        this.state.grid[START_NODE_ROW][START_NODE_COL].isStart = false;
+        this.state.grid[row][col].isStart = true;
+        this.state.grid[row][col].isWall = false;
+        START_NODE_ROW = row;
+        START_NODE_COL = col;
+        moveStart = false;
+      } else if (moveFinish) {
+        this.state.grid[FINISH_NODE_ROW][FINISH_NODE_COL].isFinish = false;
+        this.state.grid[row][col].isFinish = true;
+        this.state.grid[row][col].isWall = false;
+        FINISH_NODE_ROW = row;
+        FINISH_NODE_COL = col;
+        moveFinish = false;
+      }
+    }
+    let newGrid = this.state.grid;
+
+    if (!this.isStartFinish(row, col))
+      newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+
     this.setState({ grid: newGrid, mouseIsPressed: true });
   }
 
@@ -131,6 +164,7 @@ export default class PathFindingVisualizer extends Component {
                     <Node
                       key={nodeIdx}
                       col={col}
+                      row={row}
                       isFinish={isFinish}
                       isStart={isStart}
                       isWall={isWall}
@@ -140,7 +174,8 @@ export default class PathFindingVisualizer extends Component {
                         this.handleMouseEnter(row, col)
                       }
                       onMouseUp={() => this.handleMouseUp()}
-                      row={row}
+                      moveStart={moveStart}
+                      moveFinish={moveFinish}
                     ></Node>
                   );
                 })}
@@ -163,7 +198,7 @@ export default class PathFindingVisualizer extends Component {
           buttonStyle="btn--primary--solid"
           buttonSize="btn--medium"
         >
-          Reset
+          Clear
         </Button>
       </>
     );
