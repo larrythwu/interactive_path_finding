@@ -22,10 +22,6 @@ export default class Node extends Component {
       ? "node-start"
       : isWall
       ? "node-wall"
-      : isVisited
-      ? "node-visited "
-      : shortestPath
-      ? "node-shortest-path"
       : "";
 
     return (

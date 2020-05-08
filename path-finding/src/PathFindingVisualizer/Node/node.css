@@ -7,16 +7,16 @@
 }
 
 .node-finish {
-  background-color: rgb(212, 35, 35);
+  background-color: rgb(255, 65, 65);
 }
 
 .node-start {
-  background-color: rgb(100, 227, 143);
+  background-color: rgb(91, 255, 146);
 }
 
 .node-visited {
   animation-name: visitedAnimation;
-  animation-duration: 0.6s;
+  animation-duration: 2s;
   animation-timing-function: ease-out;
   animation-delay: 0;
   animation-direction: alternate;
@@ -27,23 +27,31 @@
 
 @keyframes visitedAnimation {
   0% {
-    transform: scale(0.3);
-    background-color: rgba(0, 0, 66, 0.75);
-    border-radius: 100%;
+    /* transform: scale(0.2); */
+    background-color: rgba(214, 214, 214, 0.75);
+    /* border-radius: 50%; */
   }
-
+  25% {
+    /* transform: scale(0.4); */
+    background-color: rgba(196, 196, 196, 0.75);
+    /* border-radius: 35%; */
+  }
   50% {
-    background-color: rgba(17, 104, 217, 0.75);
+    /* transform: scale(0.6); */
+    background-color: rgba(185, 185, 185, 0.75);
+    /* border-radius: 25%; */
   }
 
   75% {
-    transform: scale(1.2);
-    background-color: rgba(0, 217, 159, 0.75);
+    /* transform: scale(0.8); */
+    background-color: rgba(173, 173, 173, 0.75);
+    /* border-radius: 10%; */
   }
 
   100% {
-    transform: scale(1);
-    background-color: rgba(0, 190, 218, 0.75);
+    /* transform: scale(1); */
+    background-color: rgb(255, 255, 255, 0.4);
+    /* border-radius: 0%; */
   }
 }
 

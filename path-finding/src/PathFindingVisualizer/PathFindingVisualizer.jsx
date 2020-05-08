@@ -24,6 +24,7 @@ export default class PathFindingVisualizer extends Component {
   }
 
   handleMouseDown(row, col) {
+    this.clearGrid();
     const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
     this.setState({ grid: newGrid, mouseIsPressed: true });
   }
@@ -40,34 +41,36 @@ export default class PathFindingVisualizer extends Component {
 
   animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      const node = visitedNodesInOrder[i];
       if (i === visitedNodesInOrder.length) {
         setTimeout(() => {
           this.animateShortestPath(nodesInShortestPathOrder);
-        }, 4 * i);
+        }, 2 * i);
         return;
       }
-      setTimeout(() => {
-        const node = visitedNodesInOrder[i];
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node-visited";
-        // let g = this.state.grid;
-        // g[node.row][node.col].isVisited = true;
-        // this.setState({ grid: g });
-      }, 4 * i);
+      if (!node.isStart && !node.isFinish) {
+        setTimeout(() => {
+          document.getElementById(`node-${node.row}-${node.col}`).className =
+            "node node-visited";
+        }, 2 * i);
+      }
     }
   }
 
   animateShortestPath(nodesInShortestPathOrder) {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
-      setTimeout(() => {
-        const node = nodesInShortestPathOrder[i];
-        document.getElementById(`node-${node.row}-${node.col}`).className =
-          "node node-shortest-path";
-      }, 20 * i);
+      const node = nodesInShortestPathOrder[i];
+      if (!node.isStart && !node.isFinish) {
+        setTimeout(() => {
+          document.getElementById(`node-${node.row}-${node.col}`).className =
+            "node node-shortest-path";
+        }, 20 * i);
+      }
     }
   }
 
   visualizeDijkstra() {
+    this.clearGrid();
     const { grid } = this.state;
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
@@ -77,26 +80,40 @@ export default class PathFindingVisualizer extends Component {
   }
 
   resetGrid() {
-    const grid = this.state.grid;
     for (let row = 0; row < 20; row++) {
       for (let col = 0; col < 50; col++) {
-        let className = document.getElementById(`node-${row}-${col}`).className;
-        if (
-          className == "node node-visited" ||
-          className == "node node-shortest-path"
-        ) {
-          if (row === START_NODE_ROW && col === START_NODE_COL)
-            document.getElementById(`node-${row}-${col}`).className =
-              "node node-start";
-          else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
-            document.getElementById(`node-${row}-${col}`).className =
-              "node node-finish";
-          else
-            document.getElementById(`node-${row}-${col}`).className =
-              "node node";
-        }
+        if (row === START_NODE_ROW && col === START_NODE_COL)
+          document.getElementById(`node-${row}-${col}`).className =
+            "node node-start";
+        else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
+          document.getElementById(`node-${row}-${col}`).className =
+            "node node-finish";
+        else document.getElementById(`node-${row}-${col}`).className = "node";
       }
     }
+    this.setState({ grid: getInitialGrid() });
+  }
+
+  //clear everthing except the walls
+  clearGrid() {
+    const grid = this.state.grid;
+    let newGrid = getInitialGrid();
+
+    for (let row = 0; row < 20; row++) {
+      for (let col = 0; col < 50; col++) {
+        if (row === START_NODE_ROW && col === START_NODE_COL)
+          document.getElementById(`node-${row}-${col}`).className =
+            "node node-start";
+        else if (row === FINISH_NODE_ROW && col === FINISH_NODE_COL)
+          document.getElementById(`node-${row}-${col}`).className =
+            "node node-finish";
+        else if (!grid[row][col].isWall)
+          document.getElementById(`node-${row}-${col}`).className = "node";
+
+        newGrid[row][col].isWall = grid[row][col].isWall;
+      }
+    }
+    this.setState({ grid: newGrid });
   }
 
   render() {
@@ -109,15 +126,7 @@ export default class PathFindingVisualizer extends Component {
             return (
               <div key={rowIdx}>
                 {row.map((node, nodeIdx) => {
-                  const {
-                    row,
-                    col,
-                    isFinish,
-                    isStart,
-                    isWall,
-                    isVisited,
-                    shortestPath,
-                  } = node;
+                  const { row, col, isFinish, isStart, isWall } = node;
                   return (
                     <Node
                       key={nodeIdx}
@@ -125,8 +134,6 @@ export default class PathFindingVisualizer extends Component {
                       isFinish={isFinish}
                       isStart={isStart}
                       isWall={isWall}
-                      isVisited={isVisited}
-                      shortestPath={shortestPath}
                       mouseIsPressed={mouseIsPressed}
                       onMouseDown={(row, col) => this.handleMouseDown(row, col)}
                       onMouseEnter={(row, col) =>
@@ -162,6 +169,7 @@ export default class PathFindingVisualizer extends Component {
     );
   }
 }
+
 const getInitialGrid = () => {
   const grid = [];
   //get window size here
@@ -182,21 +190,15 @@ const createNode = (col, row) => {
     isStart: row === START_NODE_ROW && col === START_NODE_COL,
     isFinish: row === FINISH_NODE_ROW && col === FINISH_NODE_COL,
     distance: Infinity,
-    isVisited: false,
     isWall: false,
     previousNode: null, //parent ?
-    isVisited: false,
-    shortestPath: false,
   };
 };
 
 const getNewGridWithWallToggled = (grid, row, col) => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
-  const newNode = {
-    ...node,
-    isWall: !node.isWall,
-  };
-  newGrid[row][col] = newNode;
+  node.isWall = !node.isWall;
+  newGrid[row][col] = node;
   return newGrid;
 };
