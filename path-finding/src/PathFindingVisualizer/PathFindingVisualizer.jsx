@@ -3,6 +3,9 @@ import Node from "./Node/Node";
 import { dijkstra, getNodesInShortestPathOrder } from "../algorithms/dijkstra";
 import "./PathFindingVisualizer.css";
 import { Button } from "../components/Button.jsx";
+import Toast from 'react-bootstrap/Toast';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Popover from 'react-bootstrap/Popover';
 
 let START_NODE_ROW = 10;
 let START_NODE_COL = 15;
@@ -183,6 +186,7 @@ export default class PathFindingVisualizer extends Component {
             );
           })}
         </div>
+        
         <Button
           onClick={() => this.visualizeDijkstra()}
           type="button"
@@ -200,6 +204,8 @@ export default class PathFindingVisualizer extends Component {
         >
           Clear
         </Button>
+        <p className="guide">try clicking on the tiles and the start/end symbols</p>
+
       </>
     );
   }
